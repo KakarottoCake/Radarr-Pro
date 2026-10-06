@@ -10,7 +10,8 @@ import styles from './MovieDetailsLinks.css';
 type MovieDetailsLinksProps = Pick<
   Movie,
   'tmdbId' | 'imdbId' | 'youTubeTrailerId'
->;
+> &
+  Partial<Pick<Movie, 'title' | 'year'>>;
 
 interface MovieDetailsLink {
   externalId?: string | number;
@@ -20,7 +21,7 @@ interface MovieDetailsLink {
 }
 
 function MovieDetailsLinks(props: MovieDetailsLinksProps) {
-  const { tmdbId, imdbId, youTubeTrailerId } = props;
+  const { tmdbId, imdbId, youTubeTrailerId, title, year } = props;
 
   const links = useMemo(() => {
     const validLinks: MovieDetailsLink[] = [];
@@ -65,6 +66,23 @@ function MovieDetailsLinks(props: MovieDetailsLinksProps) {
       );
     }
 
+    if (title) {
+      const query = encodeURIComponent(year ? `${title} ${year}` : title);
+
+      validLinks.push(
+        {
+          name: 'Rotten Tomatoes',
+          url: `https://www.rottentomatoes.com/search?search=${encodeURIComponent(
+            title
+          )}`,
+        },
+        {
+          name: 'Metacritic',
+          url: `https://www.metacritic.com/search/${query}/?category=2`,
+        }
+      );
+    }
+
     if (youTubeTrailerId) {
       validLinks.push({
         name: translate('Trailer'),
@@ -76,7 +94,7 @@ function MovieDetailsLinks(props: MovieDetailsLinksProps) {
     return validLinks.sort(
       (a, b) => Number(!a.externalId) - Number(!b.externalId)
     );
-  }, [tmdbId, imdbId, youTubeTrailerId]);
+  }, [tmdbId, imdbId, youTubeTrailerId, title, year]);
 
   return (
     <div className={styles.links}>
