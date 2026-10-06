@@ -26,7 +26,7 @@ Radarr is excellent, this is built entirely on their work, and it's only possibl
 
 **Interactive search, redesigned** — releases are shown as responsive cards with clear Ready/Rejected status, a title/indexer text filter, a sort picker, large Download / Choose Movie buttons, and a one-click **Blocklist Release**.
 
-**Mobile navigation** — a bottom bar for Movies, Calendar, Wanted and Queue, bottom-sheet menus with real touch targets, sticky header, safe-area support.
+**Phone-first layout** — on phones Radarr Pro works like a native app: a tab bar for Movies, Calendar, Wanted and Queue, a floating action dock above it with each page's buttons within thumb reach, a *More* sheet with every other destination, menus that open as bottom sheets, full-screen dialogs, a compact app bar with a pill search field, and safe-area support for notched phones. Light and dark themes both supported; desktop is unchanged.
 
 ### Requested upstream, done here
 

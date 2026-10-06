@@ -9,8 +9,26 @@
   line-height: 60px;
 }
 
+/*
+ * On phones the page's actions sit in a floating dock just above the tab bar,
+ * within thumb reach, the way native apps place their toolbars.
+ */
+
 @media only screen and (max-width: $breakpointSmall) {
   .toolbar {
-    padding: 0 10px;
+    position: fixed;
+    right: 10px;
+    bottom: calc($mobileNavigationHeight + 10px + env(safe-area-inset-bottom));
+    left: 10px;
+    z-index: 3;
+    padding: 0 6px;
+    height: $mobileDockHeight;
+    border: 1px solid var(--borderColor);
+    border-radius: 18px;
+    background-color: var(--mobileDockBackgroundColor);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+    color: var(--mobileDockColor);
+    line-height: $mobileDockHeight;
+    backdrop-filter: saturate(180%) blur(16px);
   }
 }

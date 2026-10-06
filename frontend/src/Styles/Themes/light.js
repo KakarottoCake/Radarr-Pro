@@ -42,6 +42,14 @@ module.exports = {
   themeRed: '#c4273c',
   themeDarkColor: '#595959',
   themeLightColor: '#707070',
+  // Mobile
+  mobileSurfaceColor: '#f1f3f7',
+  mobileDockBackgroundColor: 'rgba(255, 255, 255, 0.92)',
+  mobileDockColor: '#3a3f51',
+  mobileTabBarBackgroundColor: 'rgba(255, 255, 255, 0.94)',
+  mobileTabBarColor: '#6b7280',
+  mobileTabBarActiveBackgroundColor: 'rgba(255, 194, 48, 0.22)',
+
   pageBackground: '#f5f7fa',
   pageFooterBackgroud: '#f1f1f1',
 

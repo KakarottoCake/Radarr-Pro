@@ -35,3 +35,43 @@
   font-size: $extraSmallFontSize;
   line-height: calc($extraSmallFontSize + 1px);
 }
+
+@media only screen and (max-width: $breakpointSmall) {
+  .toolbarButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding-top: 0;
+    min-width: 56px;
+    max-width: 56px;
+    height: 100%;
+    color: var(--mobileDockColor);
+    line-height: 1;
+    gap: 4px;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      color: var(--mobileDockColor);
+    }
+
+    &:active {
+      color: var(--themeBlue);
+    }
+  }
+
+  .labelContainer {
+    height: auto;
+  }
+
+  .label {
+    overflow: hidden;
+    max-width: 56px;
+    max-height: 22px;
+    color: var(--mobileDockColor);
+    text-align: center;
+    white-space: normal;
+    font-size: 10px;
+    line-height: 11px;
+  }
+}

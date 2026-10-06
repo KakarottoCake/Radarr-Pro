@@ -46,6 +46,7 @@ import {
   faChevronCircleDown as fasChevronCircleDown,
   faChevronCircleRight as fasChevronCircleRight,
   faChevronCircleUp as fasChevronCircleUp,
+  faChevronRight as fasChevronRight,
   faCircle as fasCircle,
   faCircleDown as fasCircleDown,
   faCloud as fasCloud,
@@ -142,6 +143,7 @@ export const CHECK = fasCheck;
 export const CHECK_INDETERMINATE = fasMinus;
 export const CHECK_CIRCLE = fasCheckCircle;
 export const CHECK_SQUARE = fasSquareCheck;
+export const CHEVRON_RIGHT = fasChevronRight;
 export const CIRCLE = fasCircle;
 export const CIRCLE_DOWN = fasCircleDown;
 export const CIRCLE_OUTLINE = farCircle;

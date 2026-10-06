@@ -1,0 +1,135 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  padding: 4px 4px 12px;
+  gap: 8px;
+}
+
+.tile {
+  composes: link from '~Components/Link/Link.css';
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 12px 4px 10px;
+  border-radius: 14px;
+  background-color: var(--mobileSurfaceColor);
+  color: var(--textColor);
+  text-align: center;
+  gap: 8px;
+
+  &:hover,
+  &:focus {
+    color: var(--textColor);
+    text-decoration: none;
+  }
+}
+
+.activeTile {
+  composes: tile;
+
+  outline: 2px solid var(--themeBlue);
+}
+
+.tileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background-color: var(--themeBlue);
+  color: var(--white);
+}
+
+.tileLabel {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.group {
+  padding: 4px 4px 12px;
+}
+
+.groupTitle {
+  margin: 8px 12px 6px;
+  color: var(--helpTextColor);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.list {
+  overflow: hidden;
+  border-radius: 14px;
+  background-color: var(--mobileSurfaceColor);
+}
+
+.row {
+  composes: link from '~Components/Link/Link.css';
+
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  min-height: 50px;
+  color: var(--textColor);
+  gap: 12px;
+
+  & + & {
+    border-top: 1px solid var(--borderColor);
+  }
+
+  &:hover,
+  &:focus {
+    color: var(--textColor);
+    text-decoration: none;
+  }
+
+  &:active {
+    background-color: var(--tableRowHoverBackgroundColor);
+  }
+}
+
+.activeRow {
+  composes: row;
+
+  color: var(--themeBlue);
+  font-weight: 600;
+
+  &:hover,
+  &:focus {
+    color: var(--themeBlue);
+  }
+}
+
+.rowIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  height: 30px;
+  border-radius: 8px;
+  background-color: var(--pageHeaderBackgroundColor);
+  color: var(--white);
+}
+
+.rowLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.rowStatus {
+  flex: 0 0 auto;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  color: var(--helpTextColor);
+}

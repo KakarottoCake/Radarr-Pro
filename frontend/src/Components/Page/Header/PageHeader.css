@@ -84,10 +84,25 @@
   .header {
     position: sticky;
     top: 0;
+    padding: env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0 0;
+    height: calc($headerHeight + env(safe-area-inset-top));
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    gap: 4px;
   }
 
   .logoContainer {
-    flex: 0 0 60px;
+    flex: 0 0 auto;
+    padding-right: 6px;
+    padding-left: max(14px, env(safe-area-inset-left));
+  }
+
+  .logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .right {
+    flex-grow: 0;
   }
 
   /* The bottom navigation's More button opens the sidebar on small screens. */

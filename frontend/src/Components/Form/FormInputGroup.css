@@ -49,3 +49,10 @@
   margin-top: 5px;
   line-height: 20px;
 }
+
+@media only screen and (max-width: $breakpointSmall) {
+  /* Keep icon buttons beside their input instead of wrapping to a new line. */
+  .inputGroup {
+    flex-wrap: nowrap;
+  }
+}

@@ -16,10 +16,12 @@
 }
 
 @media only screen and (max-width: $breakpointSmall) {
+  /* Phones navigate with the tab bar and the More sheet instead. */
   .sidebarContainer {
     position: fixed;
     top: 0;
     z-index: 2;
+    display: none;
     height: 100vh;
   }
 

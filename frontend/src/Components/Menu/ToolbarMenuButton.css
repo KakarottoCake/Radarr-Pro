@@ -20,3 +20,35 @@
 .label {
   composes: label from '~Components/Page/Toolbar/PageToolbarButton.css';
 }
+
+@media only screen and (max-width: $breakpointSmall) {
+  .menuButton {
+    padding-top: 0;
+    width: 56px;
+    height: $mobileDockHeight;
+    color: var(--mobileDockColor);
+    -webkit-tap-highlight-color: transparent;
+
+    /* Menus open as sheets on phones, so the dropdown caret is just noise. */
+    &::after {
+      display: none;
+    }
+
+    &:hover {
+      color: var(--mobileDockColor);
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+
+  .indicatorContainer {
+    top: 8px;
+    right: 10px;
+    color: var(--themeBlue);
+  }
+}

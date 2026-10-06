@@ -18,6 +18,11 @@
 
 @media only screen and (max-width: $breakpointSmall) {
   .modalFooter {
-    padding: 15px;
+    padding: 12px max(15px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
+
+    a,
+    button {
+      min-height: 44px;
+    }
   }
 }

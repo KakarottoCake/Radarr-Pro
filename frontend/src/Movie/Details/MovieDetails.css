@@ -243,3 +243,60 @@
     font-size: 19px;
   }
 }
+
+/* Phones: a compact hero with a small poster, like a native app's detail page. */
+
+@media only screen and (max-width: $breakpointSmall) {
+  .header {
+    height: auto;
+  }
+
+  .headerContent {
+    padding: 16px 14px 18px;
+  }
+
+  .poster {
+    display: block;
+    align-self: flex-start;
+    margin-right: 14px;
+    width: 104px;
+    height: 153px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+
+  .title {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 28px;
+  }
+
+  .details {
+    font-size: 15px;
+  }
+
+  .detailsInfoLabel,
+  .pathInfoLabel {
+    margin: 4px 8px 4px 0;
+  }
+
+  .path,
+  .sizeOnDisk,
+  .qualityProfileName,
+  .statusName,
+  .originalLanguage,
+  .studio,
+  .collection,
+  .genres {
+    font-size: 14px;
+  }
+
+  .overview {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .contentContainer {
+    padding: 16px 10px;
+  }
+}

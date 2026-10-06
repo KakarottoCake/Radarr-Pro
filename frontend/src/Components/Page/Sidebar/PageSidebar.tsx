@@ -44,7 +44,7 @@ interface SidebarItem {
   }[];
 }
 
-const LINKS: SidebarItem[] = [
+export const LINKS: SidebarItem[] = [
   {
     iconName: icons.MOVIE_CONTINUING,
     title: () => translate('Movies'),
