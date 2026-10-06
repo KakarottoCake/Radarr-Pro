@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Cache;
@@ -10,6 +11,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles.TorrentInfo;
 using NzbDrone.Core.Parser.Model;
@@ -49,8 +51,52 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         private IQBittorrentProxy Proxy => _proxySelector.GetProxy(Settings);
         private Version ProxyApiVersion => _proxySelector.GetApiVersion(Settings);
 
+        public override async Task<string> Download(RemoteMovie remoteMovie, IIndexer indexer)
+        {
+            if (remoteMovie.Release is TorrentInfo torrentInfo && torrentInfo.InfoHash.IsNotNullOrWhiteSpace())
+            {
+                if (TryReuseTorrent(torrentInfo.InfoHash))
+                {
+                    return torrentInfo.InfoHash.ToUpperInvariant();
+                }
+            }
+
+            return await base.Download(remoteMovie, indexer);
+        }
+
+        // A release that is already loaded in qBittorrent (for example, grabbed by another
+        // instance or added by hand) is tagged and tracked in place instead of being added again.
+        // Its category, save path and seeding are left untouched so the original owner keeps it.
+        private bool TryReuseTorrent(string hash)
+        {
+            // Tags were introduced in API v2.3. Older clients retain their existing add behavior.
+            var version = ProxyApiVersion;
+
+            if (version == null || version < new Version(2, 3) ||
+                !Proxy.IsTorrentLoaded(hash.ToLowerInvariant(), Settings))
+            {
+                return false;
+            }
+
+            Proxy.AddTags(hash.ToLowerInvariant(), new List<string> { Settings.ReuseTag }, Settings);
+            _logger.Info("Reusing existing qBittorrent torrent {0}; importing its files when complete", hash);
+
+            return true;
+        }
+
+        private bool IsReusedTorrent(string hash)
+        {
+            return Proxy.GetTorrents(Settings)?.Any(torrent =>
+                string.Equals(torrent.Hash, hash, StringComparison.OrdinalIgnoreCase) && torrent.HasTag(Settings.ReuseTag)) == true;
+        }
+
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
+            if (IsReusedTorrent(downloadClientItem.DownloadId))
+            {
+                return;
+            }
+
             // set post-import category
             if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
                 Settings.MovieImportedCategory != Settings.MovieCategory)
@@ -70,6 +116,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
         {
+            if (TryReuseTorrent(hash))
+            {
+                return hash;
+            }
+
             if (!Proxy.GetConfig(Settings).DhtEnabled && !magnetLink.Contains("&tr="))
             {
                 throw new NotSupportedException("Magnet Links without trackers not supported if DHT is disabled");
@@ -132,6 +183,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
         {
+            if (TryReuseTorrent(hash))
+            {
+                return hash;
+            }
+
             var setShareLimits = remoteMovie.SeedConfiguration != null && (remoteMovie.SeedConfiguration.Ratio.HasValue || remoteMovie.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
             var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
@@ -240,6 +296,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 // Avoid removing torrents that haven't reached the global max ratio.
                 // Removal also requires the torrent to be paused, in case a higher max ratio was set on the torrent itself (which is not exposed by the api).
                 item.CanMoveFiles = item.CanBeRemoved =
+                    !torrent.HasTag(Settings.ReuseTag) &&
                     item.DownloadClientInfo.RemoveCompletedDownloads &&
                     torrent.State is "pausedUP" or "stoppedUP" &&
                     HasReachedSeedLimit(torrent, config);
@@ -332,6 +389,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         public override void RemoveItem(DownloadClientItem item, bool deleteData)
         {
+            if (IsReusedTorrent(item.DownloadId))
+            {
+                throw new NotSupportedException("Reused torrents are kept in qBittorrent so their original files and seeding remain available.");
+            }
+
             Proxy.RemoveTorrent(item.DownloadId.ToLower(), deleteData, Settings);
         }
 

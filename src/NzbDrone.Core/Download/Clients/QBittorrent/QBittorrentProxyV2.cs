@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using NLog;
 using NzbDrone.Common.Cache;
@@ -96,14 +97,12 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         public List<QBittorrentTorrent> GetTorrents(QBittorrentSettings settings)
         {
             var request = BuildRequest(settings).Resource("/api/v2/torrents/info");
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
-            {
-                request.AddQueryParam("category", settings.MovieCategory);
-            }
-
             var response = ProcessRequest<List<QBittorrentTorrent>>(request, settings);
 
-            return response;
+            // Reused torrents keep their original category and save location.
+            return response.Where(torrent => settings.MovieCategory.IsNullOrWhiteSpace() ||
+                                             torrent.Category == settings.MovieCategory ||
+                                             torrent.HasTag(settings.ReuseTag)).ToList();
         }
 
         public bool IsTorrentLoaded(string hash, QBittorrentSettings settings)
@@ -334,6 +333,15 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                                                 .Post()
                                                 .AddFormParameter("hashes", hash)
                                                 .AddFormParameter("value", enabled ? "true" : "false");
+            ProcessRequest(request, settings);
+        }
+
+        public void AddTags(string hash, IEnumerable<string> tags, QBittorrentSettings settings)
+        {
+            var request = BuildRequest(settings).Resource("/api/v2/torrents/addTags")
+                .Post()
+                .AddFormParameter("hashes", hash)
+                .AddFormParameter("tags", string.Join(",", tags));
             ProcessRequest(request, settings);
         }
 
