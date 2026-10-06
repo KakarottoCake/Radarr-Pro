@@ -77,7 +77,7 @@ public class MovieCompressionController : Controller
 
     private static async Task<ContentResult> Forward(HttpMethod method, string path, string body, CancellationToken cancellationToken)
     {
-        if (!System.IO.File.Exists(SocketPath))
+        if (!global::System.IO.File.Exists(SocketPath))
         {
             return Unavailable(method);
         }
