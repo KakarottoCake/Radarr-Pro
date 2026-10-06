@@ -164,6 +164,7 @@
   "BlocklistOnlyHint": "Blocklist without searching for a replacement",
   "BlocklistRelease": "Blocklist Release",
   "BlocklistReleaseHelpText": "Blocks this release from being redownloaded by {appName} via RSS or Automatic Search",
+  "BlocklistReleaseMessageText": "Blocklist '{title}' for this movie? It will not be grabbed by RSS or automatic search again.",
   "BlocklistReleases": "Blocklist Releases",
   "Blocklisted": "Blocklisted",
   "BlocklistedAt": "Blocklisted at {date}",

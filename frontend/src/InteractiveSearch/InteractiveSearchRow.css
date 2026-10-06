@@ -176,6 +176,12 @@
   min-height: 38px;
 }
 
+.blocklistButton {
+  composes: actionButton;
+
+  font-size: 12px;
+}
+
 @container interactive-search (max-width: 700px) {
   .card {
     grid-template-columns: minmax(0, 1fr);
@@ -195,7 +201,7 @@
   }
 
   .buttons {
-    flex-direction: row;
+    flex-flow: row wrap;
   }
 
   .actionButton {

@@ -53,6 +53,7 @@ function getDownloadTooltip(
 interface InteractiveSearchRowProps extends Release {
   searchPayload: InteractiveSearchPayload;
   onGrabPress(...args: unknown[]): void;
+  onBlocklistPress(...args: unknown[]): void;
 }
 
 function InteractiveSearchRow(props: InteractiveSearchRowProps) {
@@ -82,8 +83,12 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     isGrabbing = false,
     isGrabbed = false,
     grabError,
+    isBlocklisting = false,
+    isManuallyBlocklisted = false,
+    blocklistError,
     searchPayload,
     onGrabPress,
+    onBlocklistPress,
   } = props;
 
   const { longDateFormat, timeFormat } = useSelector(
@@ -134,6 +139,27 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     setIsConfirmGrabModalOpen(false);
   }, [setIsConfirmGrabModalOpen]);
 
+  const [isConfirmBlocklistModalOpen, setIsConfirmBlocklistModalOpen] =
+    useState(false);
+
+  const onBlocklistButtonPress = useCallback(() => {
+    setIsConfirmBlocklistModalOpen(true);
+  }, []);
+
+  const onBlocklistConfirm = useCallback(() => {
+    setIsConfirmBlocklistModalOpen(false);
+
+    onBlocklistPress({
+      guid,
+      indexerId,
+      movieId: mappedMovieId,
+    });
+  }, [guid, indexerId, mappedMovieId, onBlocklistPress]);
+
+  const onBlocklistCancel = useCallback(() => {
+    setIsConfirmBlocklistModalOpen(false);
+  }, []);
+
   const onOverridePress = useCallback(() => {
     setIsOverrideModalOpen(true);
   }, [setIsOverrideModalOpen]);
@@ -164,14 +190,19 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
             <ProtocolLabel protocol={protocol} />
             <MovieQuality quality={quality} showRevision={true} />
             <MovieLanguages languages={languages} />
-            <span
-              className={styles.score}
-              title={translate('CustomFormatScore')}
-            >
-              <Icon name={icons.SCORE} size={12} />
-              {translate('InteractiveSearchScore')}{' '}
-              {formatCustomFormatScore(customFormatScore, customFormats.length)}
-            </span>
+            {customFormats.length || customFormatScore ? (
+              <span
+                className={styles.score}
+                title={translate('CustomFormatScore')}
+              >
+                <Icon name={icons.SCORE} size={12} />
+                {translate('InteractiveSearchScore')}{' '}
+                {formatCustomFormatScore(
+                  customFormatScore,
+                  customFormats.length
+                )}
+              </span>
+            ) : null}
           </div>
 
           <dl className={styles.metadata}>
@@ -283,9 +314,9 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
             </details>
           ) : null}
 
-          {grabError ? (
+          {grabError || blocklistError ? (
             <div className={styles.grabError} role="alert">
-              {grabError}
+              {grabError || blocklistError}
             </div>
           ) : null}
         </div>
@@ -322,6 +353,22 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
               <Icon name={icons.INTERACTIVE} size={14} />{' '}
               {translate('InteractiveSearchOverride')}
             </Button>
+
+            <SpinnerButton
+              className={styles.blocklistButton}
+              kind={kinds.DEFAULT}
+              title={translate('BlocklistReleaseHelpText')}
+              isSpinning={isBlocklisting}
+              isDisabled={isManuallyBlocklisted || isBlocklisted}
+              onPress={onBlocklistButtonPress}
+            >
+              <Icon name={icons.BLOCKLIST} size={14} />{' '}
+              {translate(
+                isManuallyBlocklisted || isBlocklisted
+                  ? 'Blocklisted'
+                  : 'BlocklistRelease'
+              )}
+            </SpinnerButton>
           </div>
         </div>
       </article>
@@ -334,6 +381,16 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
         confirmLabel={translate('Grab')}
         onConfirm={onGrabConfirm}
         onCancel={onGrabCancel}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmBlocklistModalOpen}
+        kind={kinds.DANGER}
+        title={translate('BlocklistRelease')}
+        message={translate('BlocklistReleaseMessageText', { title })}
+        confirmLabel={translate('BlocklistRelease')}
+        onConfirm={onBlocklistConfirm}
+        onCancel={onBlocklistCancel}
       />
 
       <OverrideMatchModal

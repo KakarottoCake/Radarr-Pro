@@ -12,6 +12,7 @@ import FilterMenu from 'Components/Menu/FilterMenu';
 import PageMenuButton from 'Components/Menu/PageMenuButton';
 import { align, icons, kinds, sortDirections } from 'Helpers/Props';
 import {
+  blocklistRelease,
   fetchReleases,
   grabRelease,
   setReleasesFilter,
@@ -194,6 +195,13 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
     [dispatch]
   );
 
+  const handleBlocklistPress = useCallback(
+    (payload: object) => {
+      dispatch(blocklistRelease(payload));
+    },
+    [dispatch]
+  );
+
   useEffect(
     () => {
       // Only fetch releases if they are not already being fetched and not yet populated.
@@ -313,6 +321,7 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
                 {...item}
                 searchPayload={searchPayload}
                 onGrabPress={handleGrabPress}
+                onBlocklistPress={handleBlocklistPress}
               />
             );
           })}

@@ -8,6 +8,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Exceptions;
@@ -34,6 +35,7 @@ namespace Radarr.Api.V3.Indexers
         private readonly IDownloadService _downloadService;
         private readonly IMovieService _movieService;
         private readonly IHistoryService _historyService;
+        private readonly IBlocklistService _blocklistService;
         private readonly Logger _logger;
 
         private readonly ICached<RemoteMovie> _remoteMovieCache;
@@ -45,6 +47,7 @@ namespace Radarr.Api.V3.Indexers
                              IDownloadService downloadService,
                              IMovieService movieService,
                              IHistoryService historyService,
+                             IBlocklistService blocklistService,
                              ICacheManager cacheManager,
                              IQualityProfileService qualityProfileService,
                              Logger logger)
@@ -57,6 +60,7 @@ namespace Radarr.Api.V3.Indexers
             _downloadService = downloadService;
             _movieService = movieService;
             _historyService = historyService;
+            _blocklistService = blocklistService;
             _logger = logger;
 
             PostValidator.RuleFor(s => s.IndexerId).ValidId();
@@ -121,11 +125,56 @@ namespace Radarr.Api.V3.Indexers
 
                 await _downloadService.DownloadReport(remoteMovie, release.DownloadClientId);
             }
+            catch (ReleaseBlockedException ex)
+            {
+                // Blocklisted or rejected as fake: say why instead of blaming the indexer.
+                _logger.Warn(ex.Message);
+                throw new NzbDroneClientException(HttpStatusCode.Conflict, ex.Message);
+            }
             catch (ReleaseDownloadException ex)
             {
                 _logger.Error(ex, ex.Message);
                 throw new NzbDroneClientException(HttpStatusCode.Conflict, "Getting release from indexer failed");
             }
+
+            return release;
+        }
+
+        // Lets a release seen in interactive search be blocklisted without grabbing it first,
+        // so automatic searches and RSS never pick it up for that movie.
+        [HttpPost("blocklist")]
+        [Consumes("application/json")]
+        public object BlocklistRelease([FromBody] ReleaseResource release)
+        {
+            var remoteMovie = _remoteMovieCache.Find(GetCacheKey(release));
+
+            if (remoteMovie == null)
+            {
+                throw new NzbDroneClientException(HttpStatusCode.NotFound, "Couldn't find requested release in cache, try searching again");
+            }
+
+            var movie = remoteMovie.Movie;
+
+            if (release.MovieId.HasValue)
+            {
+                movie = _movieService.GetMovie(release.MovieId.Value);
+            }
+
+            if (movie == null)
+            {
+                throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching movie, will need to be manually provided");
+            }
+
+            var blocklistedMovie = new RemoteMovie
+            {
+                Movie = movie,
+                Release = remoteMovie.Release,
+                ParsedMovieInfo = remoteMovie.ParsedMovieInfo
+            };
+
+            _blocklistService.Block(blocklistedMovie, "Manually blocklisted from interactive search");
+
+            _logger.Info("Blocklisted release '{0}' for {1}", remoteMovie.Release.Title, movie);
 
             return release;
         }

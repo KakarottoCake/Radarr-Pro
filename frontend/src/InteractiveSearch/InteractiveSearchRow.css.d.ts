@@ -5,6 +5,7 @@ interface CssExports {
   'actions': string;
   'approved': string;
   'badges': string;
+  'blocklistButton': string;
   'buttons': string;
   'card': string;
   'content': string;

@@ -31,6 +31,9 @@ interface Release {
   isGrabbing?: boolean;
   isGrabbed?: boolean;
   grabError?: string;
+  isBlocklisting?: boolean;
+  isManuallyBlocklisted?: boolean;
+  blocklistError?: string;
 }
 
 export interface ReleaseHistory {

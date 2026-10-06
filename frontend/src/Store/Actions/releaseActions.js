@@ -235,6 +235,7 @@ export const CANCEL_FETCH_RELEASES = 'releases/cancelFetchReleases';
 export const SET_RELEASES_SORT = 'releases/setReleasesSort';
 export const CLEAR_RELEASES = 'releases/clearReleases';
 export const GRAB_RELEASE = 'releases/grabRelease';
+export const BLOCKLIST_RELEASE = 'releases/blocklistRelease';
 export const UPDATE_RELEASE = 'releases/updateRelease';
 export const SET_RELEASES_FILTER = 'releases/setMovieReleasesFilter';
 
@@ -246,6 +247,7 @@ export const cancelFetchReleases = createThunk(CANCEL_FETCH_RELEASES);
 export const setReleasesSort = createAction(SET_RELEASES_SORT);
 export const clearReleases = createAction(CLEAR_RELEASES);
 export const grabRelease = createThunk(GRAB_RELEASE);
+export const blocklistRelease = createThunk(BLOCKLIST_RELEASE);
 export const updateRelease = createAction(UPDATE_RELEASE);
 export const setReleasesFilter = createAction(SET_RELEASES_FILTER);
 
@@ -301,6 +303,45 @@ export const actionHandlers = handleThunks({
         isGrabbing: false,
         isGrabbed: false,
         grabError
+      }));
+    });
+  },
+
+  [BLOCKLIST_RELEASE]: function(getState, payload, dispatch) {
+    const guid = payload.guid;
+    const release = getState().releases.items.find((item) => item.guid === guid);
+
+    dispatch(updateRelease({ guid, isBlocklisting: true }));
+
+    const promise = createAjaxRequest({
+      url: '/release/blocklist',
+      method: 'POST',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(payload)
+    }).request;
+
+    promise.done(() => {
+      const rejections = release ? release.rejections : [];
+
+      dispatch(updateRelease({
+        guid,
+        isBlocklisting: false,
+        isManuallyBlocklisted: true,
+        blocklistError: null,
+        rejections: rejections.includes('Release is blocklisted') ?
+          rejections :
+          [...rejections, 'Release is blocklisted']
+      }));
+    });
+
+    promise.fail((xhr) => {
+      const blocklistError = xhr.responseJSON && xhr.responseJSON.message || 'Failed to blocklist release';
+
+      dispatch(updateRelease({
+        guid,
+        isBlocklisting: false,
+        blocklistError
       }));
     });
   }
