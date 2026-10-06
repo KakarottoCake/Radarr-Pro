@@ -20,6 +20,7 @@ import MovieIndexProgressBar from 'Movie/Index/ProgressBar/MovieIndexProgressBar
 import MovieIndexPosterSelect from 'Movie/Index/Select/MovieIndexPosterSelect';
 import { Statistics } from 'Movie/Movie';
 import MoviePoster from 'Movie/MoviePoster';
+import MovieInteractiveSearchModal from 'Movie/Search/MovieInteractiveSearchModal';
 import { executeCommand } from 'Store/Actions/commandActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import formatDate from 'Utilities/Date/formatDate';
@@ -97,6 +98,16 @@ function MovieIndexPoster(props: MovieIndexPosterProps) {
   const dispatch = useDispatch();
   const [hasPosterError, setHasPosterError] = useState(false);
   const [isEditMovieModalOpen, setIsEditMovieModalOpen] = useState(false);
+  const [isInteractiveSearchModalOpen, setIsInteractiveSearchModalOpen] =
+    useState(false);
+
+  const onInteractiveSearchPress = useCallback(() => {
+    setIsInteractiveSearchModalOpen(true);
+  }, []);
+
+  const onInteractiveSearchModalClose = useCallback(() => {
+    setIsInteractiveSearchModalOpen(false);
+  }, []);
   const [isDeleteMovieModalOpen, setIsDeleteMovieModalOpen] = useState(false);
 
   const onRefreshPress = useCallback(() => {
@@ -165,13 +176,22 @@ function MovieIndexPoster(props: MovieIndexPosterProps) {
           />
 
           {showSearchAction ? (
-            <SpinnerIconButton
-              className={styles.action}
-              name={icons.SEARCH}
-              title={translate('SearchForMovie')}
-              isSpinning={isSearchingMovie}
-              onPress={onSearchPress}
-            />
+            <>
+              <SpinnerIconButton
+                className={styles.action}
+                name={icons.SEARCH}
+                title={translate('SearchForMovie')}
+                isSpinning={isSearchingMovie}
+                onPress={onSearchPress}
+              />
+
+              <IconButton
+                className={styles.action}
+                name={icons.INTERACTIVE}
+                title={translate('InteractiveSearch')}
+                onPress={onInteractiveSearchPress}
+              />
+            </>
           ) : null}
 
           <IconButton
@@ -385,6 +405,12 @@ function MovieIndexPoster(props: MovieIndexPosterProps) {
         showRottenTomatoesRating={showRottenTomatoesRating}
         showTraktRating={showTraktRating}
         showTags={showTags}
+      />
+
+      <MovieInteractiveSearchModal
+        isOpen={isInteractiveSearchModalOpen}
+        movieId={movieId}
+        onModalClose={onInteractiveSearchModalClose}
       />
 
       <EditMovieModal
