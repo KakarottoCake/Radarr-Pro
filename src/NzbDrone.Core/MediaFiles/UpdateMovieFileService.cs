@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles.Events;
@@ -56,7 +57,7 @@ namespace NzbDrone.Core.MediaFiles
                             return false;
                         }
 
-                        return ChangeFileDate(movieFilePath, releaseDate.Value);
+                        return ChangeFileDate(movieFilePath, releaseDate.Value, movie.Path);
                     }
 
                 case FileDateType.Cinemas:
@@ -68,7 +69,7 @@ namespace NzbDrone.Core.MediaFiles
                             return false;
                         }
 
-                        return ChangeFileDate(movieFilePath, airDate.Value);
+                        return ChangeFileDate(movieFilePath, airDate.Value, movie.Path);
                     }
             }
 
@@ -96,6 +97,37 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             return false;
+        }
+
+        private bool ChangeFileDate(string filePath, DateTime date, string folderPath)
+        {
+            var changed = ChangeFileDate(filePath, date);
+
+            ChangeFolderDate(folderPath, date);
+
+            return changed;
+        }
+
+        // The movie folder follows its file so that sorting a library by folder date
+        // matches the release date the same way sorting by file date does. The folder's
+        // own timestamp cannot be read through the disk provider (it reports the newest
+        // file inside), so it is simply set each time.
+        private void ChangeFolderDate(string folderPath, DateTime date)
+        {
+            if (folderPath.IsNullOrWhiteSpace() || !_diskProvider.FolderExists(folderPath))
+            {
+                return;
+            }
+
+            try
+            {
+                _diskProvider.FolderSetLastWriteTime(folderPath, date);
+                _logger.Trace("Date of folder [{0}] set to '{1}'", folderPath, date);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Unable to set date of folder [" + folderPath + "]");
+            }
         }
 
         public void Handle(MovieScannedEvent message)
