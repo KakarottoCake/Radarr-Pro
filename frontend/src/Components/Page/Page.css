@@ -13,6 +13,7 @@
 @media only screen and (max-width: $breakpointSmall) {
   .page {
     flex-grow: 1;
+    padding-bottom: calc($mobileNavigationHeight + env(safe-area-inset-bottom));
     height: initial;
   }
 }

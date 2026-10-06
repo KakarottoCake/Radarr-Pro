@@ -6,6 +6,13 @@
   line-height: 20px;
 }
 
+@media only screen and (max-width: $breakpointSmall) {
+  .menuContent {
+    width: 100%;
+    background-color: transparent;
+  }
+}
+
 .scroller {
   display: flex;
   flex-direction: column;

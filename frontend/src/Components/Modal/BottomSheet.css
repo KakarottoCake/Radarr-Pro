@@ -1,0 +1,32 @@
+.backdrop {
+  composes: modalBackdrop from './Modal.css';
+
+  align-items: flex-end;
+}
+
+.sheet {
+  composes: modal from './Modal.css';
+
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.content {
+  composes: modalContent from './ModalContent.css';
+
+  min-height: 0;
+}
+
+.header {
+  composes: modalHeader from './ModalHeader.css';
+
+  padding: 18px 64px 14px 20px;
+}
+
+.body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  padding: 8px 8px max(12px, env(safe-area-inset-bottom));
+  min-height: 0;
+}

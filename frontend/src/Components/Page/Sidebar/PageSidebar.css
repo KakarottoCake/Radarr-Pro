@@ -27,6 +27,7 @@
     position: fixed;
     z-index: 2;
     overflow-y: auto;
+    padding-bottom: calc($mobileNavigationHeight + env(safe-area-inset-bottom));
     width: 100%;
     height: 100%;
   }

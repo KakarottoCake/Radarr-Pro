@@ -19,6 +19,7 @@ import { setIsSidebarVisible } from 'Store/Actions/appActions';
 import dimensions from 'Styles/Variables/dimensions';
 import HealthStatus from 'System/Status/Health/HealthStatus';
 import translate from 'Utilities/String/translate';
+import { MOBILE_NAVIGATION_MORE_ID } from '../MobileNavigation';
 import Messages from './Messages/Messages';
 import PageSidebarItem from './PageSidebarItem';
 import styles from './PageSidebar.css';
@@ -279,6 +280,7 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
     (event: MouseEvent) => {
       const sidebar = ReactDOM.findDOMNode(sidebarRef.current);
       const toggleButton = document.getElementById('sidebar-toggle-button');
+      const moreButton = document.getElementById(MOBILE_NAVIGATION_MORE_ID);
       const target = event.target;
 
       if (!sidebar) {
@@ -289,6 +291,7 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
         target instanceof Node &&
         !sidebar.contains(target) &&
         !toggleButton?.contains(target) &&
+        !moreButton?.contains(target) &&
         isSidebarVisible
       ) {
         event.preventDefault();

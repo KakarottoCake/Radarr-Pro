@@ -5,6 +5,7 @@ module.exports = {
 
   // Header
   headerHeight: '60px',
+  mobileNavigationHeight: '60px',
 
   // Sidebar
   sidebarWidth: '210px',

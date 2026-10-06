@@ -81,12 +81,18 @@
 }
 
 @media only screen and (max-width: $breakpointSmall) {
+  .header {
+    position: sticky;
+    top: 0;
+  }
+
   .logoContainer {
     flex: 0 0 60px;
   }
 
+  /* The bottom navigation's More button opens the sidebar on small screens. */
   .sidebarToggleContainer {
-    display: flex;
+    display: none;
   }
 }
 

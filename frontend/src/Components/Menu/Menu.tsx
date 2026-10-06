@@ -7,7 +7,11 @@ import React, {
   useState,
 } from 'react';
 import { Manager, Popper, PopperProps, Reference } from 'react-popper';
+import { useSelector } from 'react-redux';
+import BottomSheet from 'Components/Modal/BottomSheet';
 import Portal from 'Components/Portal';
+import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import translate from 'Utilities/String/translate';
 import styles from './Menu.css';
 
 const sharedPopperOptions = {
@@ -50,6 +54,7 @@ function Menu({
   enforceMaxHeight = true,
 }: MenuProps) {
   const updater = useRef<(() => void) | null>(null);
+  const { isSmallScreen } = useSelector(createDimensionsSelector());
   const menuButtonId = useId();
   const menuContentId = useId();
   const [maxHeight, setMaxHeight] = useState(0);
@@ -125,15 +130,22 @@ function Menu({
   }, []);
 
   const childrenArray = React.Children.toArray(children);
-  const button = React.cloneElement(childrenArray[0] as ReactElement, {
+  const buttonElement = childrenArray[0] as ReactElement;
+  const button = React.cloneElement(buttonElement, {
     onPress: handleMenuButtonPress,
+    'aria-expanded': isMenuOpen,
+    'aria-haspopup': isSmallScreen ? 'dialog' : 'menu',
   });
 
+  const handleSheetClose = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
   useEffect(() => {
-    if (enforceMaxHeight) {
+    if (enforceMaxHeight && !isSmallScreen) {
       updateMaxHeight();
     }
-  }, [enforceMaxHeight, updateMaxHeight]);
+  }, [enforceMaxHeight, isSmallScreen, updateMaxHeight]);
 
   useEffect(() => {
     if (updater.current && isMenuOpen) {
@@ -171,6 +183,38 @@ function Menu({
     handleWindowClick,
     handleTouchStart,
   ]);
+
+  if (isSmallScreen) {
+    // On phones menus open as a bottom sheet with large touch targets instead of
+    // a small popover anchored to the button.
+    const sheetTitle =
+      buttonElement.props['aria-label'] ??
+      (typeof buttonElement.props.text === 'string'
+        ? buttonElement.props.text
+        : undefined) ??
+      (typeof buttonElement.props.title === 'string'
+        ? buttonElement.props.title
+        : undefined) ??
+      translate('Menu');
+
+    return (
+      <>
+        <div id={menuButtonId} className={className}>
+          {button}
+        </div>
+
+        <BottomSheet
+          isOpen={isMenuOpen}
+          title={sheetTitle}
+          onModalClose={handleSheetClose}
+        >
+          {React.cloneElement(childrenArray[1] as ReactElement, {
+            isOpen: isMenuOpen,
+          })}
+        </BottomSheet>
+      </>
+    );
+  }
 
   return (
     <Manager>
