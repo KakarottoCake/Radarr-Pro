@@ -95,6 +95,8 @@ class CollectionOverviews extends Component {
       this._gridScrollToPosition({ scrollTop });
     }
 
+    this.scrollToRequestedCollection();
+
     if (jumpToCharacter != null && jumpToCharacter !== prevProps.jumpToCharacter) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
@@ -109,6 +111,32 @@ class CollectionOverviews extends Component {
 
   //
   // Control
+
+  // A link such as /collections?collectionId=12 (used by the movie details page) scrolls the
+  // matching collection into view once the grid is ready.
+  scrollToRequestedCollection() {
+    const { items, location } = this.props;
+
+    if (!this._grid || this._requestedCollectionHandled || !location?.search) {
+      return;
+    }
+
+    const collectionId = parseInt(new URLSearchParams(location.search).get('collectionId'));
+
+    if (!collectionId) {
+      this._requestedCollectionHandled = true;
+      return;
+    }
+
+    const index = items.findIndex((item) => item.id === collectionId);
+
+    if (index === -1) {
+      return;
+    }
+
+    this._requestedCollectionHandled = true;
+    this._gridScrollToCell({ rowIndex: index, columnIndex: 0 });
+  }
 
   setGridRef = (ref) => {
     this._grid = ref;
@@ -269,6 +297,7 @@ CollectionOverviews.propTypes = {
   sortKey: PropTypes.string,
   overviewOptions: PropTypes.object.isRequired,
   jumpToCharacter: PropTypes.string,
+  location: PropTypes.object,
   scrollTop: PropTypes.number,
   scroller: PropTypes.instanceOf(Element).isRequired,
   showRelativeDates: PropTypes.bool.isRequired,

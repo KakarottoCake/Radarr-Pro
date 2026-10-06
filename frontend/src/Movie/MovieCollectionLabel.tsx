@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import { toggleCollectionMonitored } from 'Store/Actions/movieCollectionActions';
 import { createCollectionSelectorForHook } from 'Store/Selectors/createCollectionSelector';
@@ -44,7 +45,12 @@ function MovieCollectionLabel({ tmdbId }: MovieCollectionLabelProps) {
         size={15}
         onPress={handleMonitorTogglePress}
       />
-      {title}
+      <Link
+        to={`/collections?collectionId=${id}`}
+        title={translate('ViewCollection')}
+      >
+        {title}
+      </Link>
     </div>
   );
 }
