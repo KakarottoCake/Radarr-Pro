@@ -47,7 +47,7 @@ function MovieInteractiveSearchModalContent({
           : translate('InteractiveSearchModalHeader')}
       </ModalHeader>
 
-      <ModalBody scrollDirection={scrollDirections.BOTH}>
+      <ModalBody scrollDirection={scrollDirections.VERTICAL}>
         <InteractiveSearch searchPayload={{ movieId }} />
       </ModalBody>
 

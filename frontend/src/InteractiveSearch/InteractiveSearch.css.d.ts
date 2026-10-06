@@ -2,7 +2,16 @@
 // Please do not change this file!
 interface CssExports {
   'alert': string;
-  'filterMenuContainer': string;
+  'directionButton': string;
+  'filterInput': string;
+  'filterRow': string;
+  'resultCount': string;
+  'results': string;
+  'search': string;
+  'sortInput': string;
+  'sortRow': string;
+  'srOnly': string;
+  'toolbar': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

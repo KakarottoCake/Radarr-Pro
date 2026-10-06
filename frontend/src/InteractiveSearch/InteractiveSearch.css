@@ -1,11 +1,99 @@
-.filterMenuContainer {
+.search {
+  min-width: 0;
+  container-name: interactive-search;
+  container-type: inline-size;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 0 14px;
+  background-color: var(--modalBackgroundColor);
+}
+
+.filterRow {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.sortRow {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.resultCount {
+  flex: 1;
+  color: var(--helpTextColor);
+  font-size: 12px;
+}
+
+.sortInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 12px;
+
+  select {
+    min-height: 38px;
+    width: 185px;
+  }
+}
+
+.directionButton {
+  composes: button from '~Components/Link/Button.css';
+
+  min-width: 40px;
+  min-height: 38px;
+}
+
+.srOnly {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+
+  white-space: nowrap;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .alert {
   composes: alert from '~Components/Alert.css';
 
   margin-top: 10px;
+}
+
+@container interactive-search (max-width: 450px) {
+  .sortRow {
+    flex-wrap: wrap;
+  }
+
+  .resultCount {
+    flex-basis: 100%;
+  }
+
+  .sortInput {
+    flex: 1;
+
+    select {
+      flex: 1;
+      min-width: 0;
+      width: auto;
+    }
+  }
 }

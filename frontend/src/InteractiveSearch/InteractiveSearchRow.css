@@ -1,105 +1,209 @@
-.protocol {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 80px;
+.row {
+  width: 100%;
 }
 
-.titleContent {
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+
+  padding: 16px;
+  border: 1px solid var(--borderColor);
+  border-radius: 8px;
+  background-color: var(--cardBackgroundColor);
+  gap: 20px;
+}
+
+.content {
+  min-width: 0;
+}
+
+.releaseTitle {
+  display: block;
+  overflow-wrap: anywhere;
+
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.badges {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  word-break: break-all;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 6px;
 }
 
-.indexer {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 85px;
+.score {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+  gap: 5px;
 }
 
-.quality,
-.languages {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-}
+.metadata {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
 
-.quality {
-  white-space: nowrap;
-}
+  margin: 14px 0 0;
+  gap: 12px;
 
-.languages {
-  width: 100px;
-}
+  & > div {
+    min-width: 0;
+  }
 
-.customFormatScore {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+  & dt {
+    margin-bottom: 4px;
+    color: var(--helpTextColor);
+    font-size: 12px;
+  }
 
-  width: 55px;
-  font-weight: bold;
-  cursor: default;
-}
+  & dd {
+    overflow-wrap: anywhere;
 
-.rejected,
-.indexerFlags {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 50px;
-}
-
-.history {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 75px;
-}
-
-.blocklistIconContainer {
-  margin-left: 5px;
-}
-
-.age,
-.size {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  white-space: nowrap;
-}
-
-.peers {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 75px;
-}
-
-.download {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
-
-  width: 80px;
-}
-
-.manualDownloadContent {
-  position: relative;
-  display: inline-block;
-  margin: 0 2px;
-  width: 22px;
-  height: 20.39px;
-  vertical-align: middle;
-  line-height: 20.39px;
-
-  &:hover {
-    color: var(--iconButtonHoverColor);
+    margin: 0;
+    font-size: 13px;
   }
 }
 
-.interactiveIcon {
-  position: absolute;
-  top: 4px;
-  left: 0;
-  /* width: 100%; */
-  text-align: center;
+.history {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  gap: 12px;
+
+  font-size: 12px;
+
+  & span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
 }
 
-.downloadIcon {
-  position: absolute;
-  top: 7px;
-  left: 8px;
-  /* width: 100%; */
-  text-align: center;
+.rejectionPreview {
+  overflow: hidden;
+  overflow-wrap: anywhere;
+
+  margin-top: 12px;
+  max-height: 3em;
+  color: var(--dangerColor);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.details {
+  margin-top: 8px;
+  font-size: 12px;
+
+  & summary {
+    padding: 8px 0;
+    color: var(--linkColor);
+    cursor: pointer;
+  }
+}
+
+.detailSection {
+  overflow-wrap: anywhere;
+
+  margin-top: 10px;
+}
+
+.list {
+  margin: 8px 0;
+  padding-left: 20px;
+
+  & li + li {
+    margin-top: 6px;
+  }
+}
+
+.formats {
+  margin-top: 8px;
+
+  & span {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+.grabError {
+  overflow-wrap: anywhere;
+
+  margin-top: 12px;
+  color: var(--dangerColor);
+}
+
+.actions {
+  display: flex;
+  align-self: start;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.approved,
+.rejected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.approved {
+  color: var(--successColor);
+}
+
+.rejected {
+  color: var(--dangerColor);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionButton {
+  composes: button from '~Components/Link/Button.css';
+
+  min-height: 38px;
+}
+
+@container interactive-search (max-width: 700px) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .metadata {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions {
+    padding-top: 12px;
+    border-top: 1px solid var(--borderColor);
+    gap: 10px;
+  }
+
+  .buttons {
+    flex-direction: row;
+  }
+
+  .actionButton {
+    flex: 1;
+    padding-right: 8px;
+    padding-left: 8px;
+    min-width: 0;
+    white-space: normal;
+    font-size: 12px;
+  }
 }

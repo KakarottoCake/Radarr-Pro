@@ -1,17 +1,16 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
 import ReleasesAppState from 'App/State/ReleasesAppState';
 import Alert from 'Components/Alert';
+import SelectInput from 'Components/Form/SelectInput';
+import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
+import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import PageMenuButton from 'Components/Menu/PageMenuButton';
-import Column from 'Components/Table/Column';
-import Table from 'Components/Table/Table';
-import TableBody from 'Components/Table/TableBody';
 import { align, icons, kinds, sortDirections } from 'Helpers/Props';
-import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   fetchReleases,
   grabRelease,
@@ -19,6 +18,8 @@ import {
   setReleasesSort,
 } from 'Store/Actions/releaseActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import { InputChanged } from 'typings/inputs';
+import Release from 'typings/Release';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import InteractiveSearchFilterModal from './InteractiveSearchFilterModal';
@@ -26,98 +27,88 @@ import InteractiveSearchPayload from './InteractiveSearchPayload';
 import InteractiveSearchRow from './InteractiveSearchRow';
 import styles from './InteractiveSearch.css';
 
-const columns: Column[] = [
+const SORT_OPTIONS = [
   {
-    name: 'protocol',
-    label: () => translate('Source'),
-    isSortable: true,
-    isVisible: true,
+    key: 'releaseWeight',
+    get value() {
+      return translate('InteractiveSearchRecommended');
+    },
   },
   {
-    name: 'age',
-    label: () => translate('Age'),
-    isSortable: true,
-    isVisible: true,
+    key: 'customFormatScore',
+    get value() {
+      return translate('CustomFormatScore');
+    },
   },
   {
-    name: 'title',
-    label: () => translate('Title'),
-    isSortable: true,
-    isVisible: true,
+    key: 'qualityWeight',
+    get value() {
+      return translate('Quality');
+    },
   },
   {
-    name: 'indexer',
-    label: () => translate('Indexer'),
-    isSortable: true,
-    isVisible: true,
+    key: 'size',
+    get value() {
+      return translate('Size');
+    },
   },
   {
-    name: 'history',
-    label: () => translate('History'),
-    isSortable: true,
-    fixedSortDirection: sortDirections.ASCENDING,
-    isVisible: true,
+    key: 'peers',
+    get value() {
+      return translate('Peers');
+    },
   },
   {
-    name: 'size',
-    label: () => translate('Size'),
-    isSortable: true,
-    isVisible: true,
+    key: 'age',
+    get value() {
+      return translate('Age');
+    },
   },
   {
-    name: 'peers',
-    label: () => translate('Peers'),
-    isSortable: true,
-    isVisible: true,
+    key: 'title',
+    get value() {
+      return translate('Title');
+    },
   },
   {
-    name: 'languages',
-    label: () => translate('Language'),
-    isSortable: true,
-    isVisible: true,
+    key: 'indexer',
+    get value() {
+      return translate('Indexer');
+    },
   },
   {
-    name: 'qualityWeight',
-    label: () => translate('Quality'),
-    isSortable: true,
-    isVisible: true,
+    key: 'history',
+    get value() {
+      return translate('History');
+    },
   },
   {
-    name: 'customFormatScore',
-    label: React.createElement(Icon, {
-      name: icons.SCORE,
-      title: () => translate('CustomFormatScore'),
-    }),
-    isSortable: true,
-    isVisible: true,
+    key: 'protocol',
+    get value() {
+      return translate('Source');
+    },
   },
   {
-    name: 'indexerFlags',
-    label: React.createElement(Icon, {
-      name: icons.FLAG,
-      title: () => translate('IndexerFlags'),
-    }),
-    isSortable: true,
-    isVisible: true,
+    key: 'languages',
+    get value() {
+      return translate('Languages');
+    },
   },
   {
-    name: 'rejections',
-    label: React.createElement(Icon, {
-      name: icons.DANGER,
-      title: () => translate('Rejections'),
-    }),
-    isSortable: true,
-    fixedSortDirection: sortDirections.ASCENDING,
-    isVisible: true,
+    key: 'indexerFlags',
+    get value() {
+      return translate('IndexerFlags');
+    },
   },
   {
-    name: 'releaseWeight',
-    label: React.createElement(Icon, { name: icons.DOWNLOAD }),
-    isSortable: true,
-    fixedSortDirection: sortDirections.ASCENDING,
-    isVisible: true,
+    key: 'rejections',
+    get value() {
+      return translate('Rejections');
+    },
   },
 ];
+
+const DESCENDING_BY_DEFAULT = ['customFormatScore', 'qualityWeight', 'peers'];
 
 interface InteractiveSearchProps {
   searchPayload: InteractiveSearchPayload;
@@ -140,6 +131,21 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
   );
 
   const dispatch = useDispatch();
+  const [filterText, setFilterText] = useState('');
+
+  const visibleItems = useMemo(() => {
+    const terms = filterText.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+    if (!terms.length) {
+      return items as Release[];
+    }
+
+    return (items as Release[]).filter((item) => {
+      const haystack = `${item.title} ${item.indexer}`.toLowerCase();
+
+      return terms.every((term) => haystack.includes(term));
+    });
+  }, [items, filterText]);
 
   const handleFilterSelect = useCallback(
     (selectedFilterKey: string | number) => {
@@ -148,12 +154,38 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
     [dispatch]
   );
 
-  const handleSortPress = useCallback(
-    (sortKey: string, sortDirection?: SortDirection) => {
-      dispatch(setReleasesSort({ sortKey, sortDirection }));
+  const handleFilterTextChange = useCallback(
+    ({ value }: InputChanged<string>) => {
+      setFilterText(value);
+    },
+    []
+  );
+
+  const handleSortChange = useCallback(
+    ({ value }: InputChanged<string>) => {
+      dispatch(
+        setReleasesSort({
+          sortKey: value,
+          sortDirection: DESCENDING_BY_DEFAULT.includes(value)
+            ? sortDirections.DESCENDING
+            : sortDirections.ASCENDING,
+        })
+      );
     },
     [dispatch]
   );
+
+  const handleSortDirectionPress = useCallback(() => {
+    dispatch(
+      setReleasesSort({
+        sortKey,
+        sortDirection:
+          sortDirection === sortDirections.ASCENDING
+            ? sortDirections.DESCENDING
+            : sortDirections.ASCENDING,
+      })
+    );
+  }, [sortKey, sortDirection, dispatch]);
 
   const handleGrabPress = useCallback(
     (payload: object) => {
@@ -175,20 +207,72 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
   );
 
   const errorMessage = getErrorMessage(error);
+  const isAscending = sortDirection === sortDirections.ASCENDING;
+  const sortDirectionLabel = translate(
+    isAscending ? 'InteractiveSearchAscending' : 'InteractiveSearchDescending'
+  );
 
   return (
-    <div>
-      <div className={styles.filterMenuContainer}>
-        <FilterMenu
-          alignMenu={align.RIGHT}
-          selectedFilterKey={selectedFilterKey}
-          filters={filters}
-          customFilters={customFilters}
-          buttonComponent={PageMenuButton}
-          filterModalConnectorComponent={InteractiveSearchFilterModal}
-          filterModalConnectorComponentProps={{ type: 'movies' }}
-          onFilterSelect={handleFilterSelect}
-        />
+    <div className={styles.search}>
+      <div className={styles.toolbar}>
+        <div className={styles.filterRow}>
+          <label className={styles.filterInput}>
+            <span className={styles.srOnly}>
+              {translate('FilterReleasesPlaceholder')}
+            </span>
+
+            <TextInput
+              name="releaseFilter"
+              value={filterText}
+              placeholder={translate('FilterReleasesPlaceholder')}
+              onChange={handleFilterTextChange}
+            />
+          </label>
+
+          <FilterMenu
+            alignMenu={align.RIGHT}
+            selectedFilterKey={selectedFilterKey}
+            filters={filters}
+            customFilters={customFilters}
+            buttonComponent={PageMenuButton}
+            filterModalConnectorComponent={InteractiveSearchFilterModal}
+            filterModalConnectorComponentProps={{ type: 'movies' }}
+            onFilterSelect={handleFilterSelect}
+          />
+        </div>
+
+        <div className={styles.sortRow}>
+          <span className={styles.resultCount} role="status" aria-live="polite">
+            {isFetching
+              ? translate('Searching')
+              : translate('InteractiveSearchResultsCount', {
+                  count: visibleItems.length,
+                  total: totalItems,
+                })}
+          </span>
+
+          <label className={styles.sortInput}>
+            <span>{translate('Sort')}</span>
+
+            <SelectInput
+              name="releaseSort"
+              value={sortKey}
+              values={SORT_OPTIONS}
+              onChange={handleSortChange}
+            />
+          </label>
+
+          <Button
+            className={styles.directionButton}
+            title={sortDirectionLabel}
+            aria-label={sortDirectionLabel}
+            onPress={handleSortDirectionPress}
+          >
+            <Icon
+              name={isAscending ? icons.SORT_ASCENDING : icons.SORT_DESCENDING}
+            />
+          </Button>
+        </div>
       </div>
 
       {isFetching ? <LoadingIndicator /> : null}
@@ -214,35 +298,28 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
         </Alert>
       ) : null}
 
-      {!!totalItems && isPopulated && !items.length ? (
+      {!!totalItems && isPopulated && !visibleItems.length ? (
         <Alert kind={kinds.WARNING} className={styles.alert}>
           {translate('AllResultsHiddenFilter')}
         </Alert>
       ) : null}
 
-      {isPopulated && !!items.length ? (
-        <Table
-          columns={columns}
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onSortPress={handleSortPress}
-        >
-          <TableBody>
-            {items.map((item) => {
-              return (
-                <InteractiveSearchRow
-                  key={`${item.indexerId}-${item.guid}`}
-                  {...item}
-                  searchPayload={searchPayload}
-                  onGrabPress={handleGrabPress}
-                />
-              );
-            })}
-          </TableBody>
-        </Table>
+      {isPopulated && !!visibleItems.length ? (
+        <div className={styles.results}>
+          {visibleItems.map((item) => {
+            return (
+              <InteractiveSearchRow
+                key={`${item.indexerId}-${item.guid}`}
+                {...item}
+                searchPayload={searchPayload}
+                onGrabPress={handleGrabPress}
+              />
+            );
+          })}
+        </div>
       ) : null}
 
-      {totalItems !== items.length && !!items.length ? (
+      {totalItems !== visibleItems.length && !!visibleItems.length ? (
         <Alert kind={kinds.INFO} className={styles.alert}>
           {translate('SomeResultsHiddenFilter')}
         </Alert>
