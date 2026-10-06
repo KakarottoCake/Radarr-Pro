@@ -1,5 +1,12 @@
 import { throttle } from 'lodash';
-import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { createSelector } from 'reselect';
@@ -146,6 +153,15 @@ function MovieIndexTable(props: MovieIndexTableProps) {
     };
   }, [isSmallScreen, listRef, scrollerRef]);
 
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleHorizontalScroll = useCallback(
+    ({ scrollLeft: left }: { scrollLeft: number }) => {
+      setScrollLeft(left);
+    },
+    []
+  );
+
   useEffect(() => {
     if (jumpToCharacter) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
@@ -169,13 +185,26 @@ function MovieIndexTable(props: MovieIndexTableProps) {
 
   return (
     <div ref={measureRef}>
-      <Scroller className={styles.tableScroller} scrollDirection="horizontal">
-        <MovieIndexTableHeader
-          columns={columns}
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          isSelectMode={isSelectMode}
-        />
+      {/*
+        The header lives outside the horizontal scroller so it can stick to the top of
+        the page while scrolling vertically; it follows horizontal scrolling instead.
+      */}
+      <div className={styles.stickyHeader}>
+        <div style={{ transform: `translateX(${-scrollLeft}px)` }}>
+          <MovieIndexTableHeader
+            columns={columns}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            isSelectMode={isSelectMode}
+          />
+        </div>
+      </div>
+
+      <Scroller
+        className={styles.tableScroller}
+        scrollDirection="horizontal"
+        onScroll={handleHorizontalScroll}
+      >
         <List<RowItemData>
           ref={listRef}
           style={{

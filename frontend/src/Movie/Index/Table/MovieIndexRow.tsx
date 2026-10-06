@@ -23,6 +23,7 @@ import createMovieIndexItemSelector from 'Movie/Index/createMovieIndexItemSelect
 import { Statistics } from 'Movie/Movie';
 import MoviePopularityIndex from 'Movie/MoviePopularityIndex';
 import MovieTitleLink from 'Movie/MovieTitleLink';
+import MovieInteractiveSearchModal from 'Movie/Search/MovieInteractiveSearchModal';
 import { executeCommand } from 'Store/Actions/commandActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import { SelectStateInputProps } from 'typings/props';
@@ -94,6 +95,16 @@ function MovieIndexRow(props: MovieIndexRowProps) {
 
   const dispatch = useDispatch();
   const [isEditMovieModalOpen, setIsEditMovieModalOpen] = useState(false);
+  const [isInteractiveSearchModalOpen, setIsInteractiveSearchModalOpen] =
+    useState(false);
+
+  const onInteractiveSearchPress = useCallback(() => {
+    setIsInteractiveSearchModalOpen(true);
+  }, []);
+
+  const onInteractiveSearchModalClose = useCallback(() => {
+    setIsInteractiveSearchModalOpen(false);
+  }, []);
   const [isDeleteMovieModalOpen, setIsDeleteMovieModalOpen] = useState(false);
   const [selectState, selectDispatch] = useSelect();
 
@@ -494,12 +505,20 @@ function MovieIndexRow(props: MovieIndexRowProps) {
               />
 
               {showSearchAction ? (
-                <SpinnerIconButton
-                  name={icons.SEARCH}
-                  title={translate('SearchForMovie')}
-                  isSpinning={isSearchingMovie}
-                  onPress={onSearchPress}
-                />
+                <>
+                  <SpinnerIconButton
+                    name={icons.SEARCH}
+                    title={translate('SearchForMovie')}
+                    isSpinning={isSearchingMovie}
+                    onPress={onSearchPress}
+                  />
+
+                  <IconButton
+                    name={icons.INTERACTIVE}
+                    title={translate('InteractiveSearch')}
+                    onPress={onInteractiveSearchPress}
+                  />
+                </>
               ) : null}
 
               <IconButton
@@ -513,6 +532,12 @@ function MovieIndexRow(props: MovieIndexRowProps) {
 
         return null;
       })}
+
+      <MovieInteractiveSearchModal
+        isOpen={isInteractiveSearchModalOpen}
+        movieId={movieId}
+        onModalClose={onInteractiveSearchModalClose}
+      />
 
       <EditMovieModal
         isOpen={isEditMovieModalOpen}
