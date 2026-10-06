@@ -85,9 +85,16 @@ namespace NzbDrone.Core.Download
                     {
                         return await DownloadFromWebUrl(remoteMovie, indexer, torrentUrl);
                     }
+                    catch (ReleaseBlockedException)
+                    {
+                        // Blocklisted or fake: the magnet points at the same content, so never fall back to it.
+                        throw;
+                    }
                     catch (Exception ex)
                     {
-                        if (!magnetUrl.IsNullOrWhiteSpace())
+                        // Only fall back when there is a magnet to fall back to. Otherwise the failure
+                        // was swallowed and the grab was reported as sent to the download client.
+                        if (magnetUrl.IsNullOrWhiteSpace())
                         {
                             throw;
                         }

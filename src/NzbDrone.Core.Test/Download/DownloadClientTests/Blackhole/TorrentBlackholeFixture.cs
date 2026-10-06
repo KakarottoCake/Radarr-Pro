@@ -11,6 +11,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download.Clients.Blackhole;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MediaFiles;
@@ -204,6 +205,52 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
             Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_filePath), Times.Never());
             Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_magnetFilePath), Times.Never());
             Mocker.GetMock<IHttpClient>().Verify(c => c.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        private void GivenFakeTorrentContents()
+        {
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(c => c.EnableFakeReleaseProtection)
+                .Returns(true);
+
+            Mocker.GetMock<ITorrentFileInfoReader>()
+                .Setup(c => c.GetContentsFromTorrentFile(It.IsAny<byte[]>()))
+                .Returns(new TorrentContents
+                {
+                    Name = _title,
+                    Files = new List<TorrentContentFile>
+                    {
+                        new TorrentContentFile("Droned.1998.1080p.WEB-DL-DRONE.mkv.exe", 4096000)
+                    }
+                });
+        }
+
+        [Test]
+        public void Download_should_reject_fake_release_without_writing_torrent()
+        {
+            GivenFakeTorrentContents();
+
+            var remoteMovie = CreateRemoteMovie();
+
+            Assert.ThrowsAsync<FakeReleaseException>(async () => await Subject.Download(remoteMovie, CreateIndexer()));
+
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_filePath), Times.Never());
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void Download_should_not_fall_back_to_magnet_for_fake_release()
+        {
+            GivenFakeTorrentContents();
+            Subject.Definition.Settings.As<TorrentBlackholeSettings>().SaveMagnetFiles = true;
+
+            var remoteMovie = CreateRemoteMovie();
+
+            Assert.ThrowsAsync<FakeReleaseException>(async () => await Subject.Download(remoteMovie, CreateIndexer()));
+
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_filePath), Times.Never());
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_magnetFilePath), Times.Never());
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
