@@ -17,10 +17,10 @@
 
 .namingFormat {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
   margin-top: 8px;
+  gap: 8px;
 }
 
 .namingFormatButton {
@@ -29,6 +29,7 @@
 
 .namingFormatExample {
   overflow-wrap: anywhere;
+
   color: var(--helpTextColor);
   font-size: $smallFontSize;
 }
