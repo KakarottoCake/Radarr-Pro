@@ -2,16 +2,13 @@ import { routerMiddleware } from 'connected-react-router';
 import { applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import createPersistState from './createPersistState';
-import createSentryMiddleware from './createSentryMiddleware';
 
 export default function(history) {
   const middlewares = [];
-  const sentryMiddleware = createSentryMiddleware();
 
-  if (sentryMiddleware) {
-    middlewares.push(sentryMiddleware);
-  }
-
+  // Radarr Pro does not report browser errors to Sentry. Upstream sends them to
+  // sentry.servarr.com, where errors from a fork's modified code would describe bugs
+  // the Radarr team cannot reproduce or fix.
   middlewares.push(routerMiddleware(history));
   middlewares.push(thunk);
 

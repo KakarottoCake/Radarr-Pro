@@ -16,7 +16,6 @@ using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Movies.Commands;
-using NzbDrone.Core.Update.Commands;
 
 namespace NzbDrone.Core.Jobs
 {
@@ -71,11 +70,8 @@ namespace NzbDrone.Core.Jobs
                         TypeName = typeof(MessagingCleanupCommand).FullName
                     },
 
-                    new ScheduledTask
-                    {
-                        Interval = 6 * 60,
-                        TypeName = typeof(ApplicationCheckUpdateCommand).FullName
-                    },
+                    // No scheduled update check: Radarr Pro updates with "docker pull", and the
+                    // upstream update service only knows about upstream Radarr builds.
 
                     new ScheduledTask
                     {

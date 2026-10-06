@@ -2,63 +2,50 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Core.Update;
 
 namespace NzbDrone.Core.Test.UpdateTests
 {
+    /// <summary>
+    /// Radarr Pro never offers an in-app update. Upstream's version of this fixture asked
+    /// the update service for real packages over the network; those tests are gone because the
+    /// behaviour they covered is gone.
+    /// </summary>
     public class UpdatePackageProviderFixture : CoreTest<UpdatePackageProvider>
     {
-        [SetUp]
-        public void Setup()
+        [Test]
+        public void should_never_offer_an_update()
         {
-            Mocker.GetMock<IPlatformInfo>().SetupGet(c => c.Version).Returns(new Version("9.9.9"));
+            Subject.GetLatestUpdate("develop", new Version(3, 0)).Should().BeNull();
         }
 
         [Test]
-        public void no_update_when_version_higher()
+        public void should_never_offer_an_update_for_an_unknown_branch()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("develop", new Version(10, 0)).Should().BeNull();
+            Subject.GetLatestUpdate("invalid_branch", new Version(0, 2)).Should().BeNull();
         }
 
         [Test]
-        public void finds_update_when_version_lower()
+        public void should_report_no_recent_updates()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("develop", new Version(3, 0)).Should().NotBeNull();
+            Subject.GetRecentUpdates("nightly", new Version(3, 0), null).Should().BeEmpty();
         }
 
+        /// <summary>
+        /// The point of the fork's provider is that it makes no request at all, so guard the
+        /// dependency rather than the return value. Reintroducing an HTTP client here would put
+        /// the call to the upstream update service back, along with the OS and runtime details it carries.
+        /// </summary>
         [Test]
-        [Ignore("TODO: Update API")]
-        public void should_get_master_if_branch_doesnt_exit()
+        public void should_not_depend_on_an_http_client()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("invalid_branch", new Version(0, 2)).Should().NotBeNull();
-        }
-
-        [Test]
-        public void should_get_recent_updates()
-        {
-            const string branch = "nightly";
-            UseRealHttp();
-            var recent = Subject.GetRecentUpdates(branch, new Version(3, 0), null);
-            var recentWithChanges = recent.Where(c => c.Changes != null);
-
-            recent.Should().NotBeEmpty();
-            recent.Should().OnlyContain(c => c.Hash.IsNotNullOrWhiteSpace());
-            recent.Should().OnlyContain(c => c.FileName.Contains("Radarr"));
-            recent.Should().OnlyContain(c => c.ReleaseDate.Year >= 2014);
-
-            if (recentWithChanges.Any())
-            {
-                recentWithChanges.Should().OnlyContain(c => c.Changes.New != null);
-                recentWithChanges.Should().OnlyContain(c => c.Changes.Fixed != null);
-            }
-
-            recent.Should().OnlyContain(c => c.Branch == branch);
+            typeof(UpdatePackageProvider)
+                .GetConstructors()
+                .SelectMany(c => c.GetParameters())
+                .Should()
+                .NotContain(p => p.ParameterType == typeof(IHttpClient));
         }
     }
 }
