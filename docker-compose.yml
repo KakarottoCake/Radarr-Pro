@@ -1,0 +1,28 @@
+services:
+  radarr-pro:
+    image: ghcr.io/kakarottocake/radarr-pro:latest
+    container_name: radarr-pro
+    restart: unless-stopped
+
+    ports:
+      - "${RADARR_PRO_PORT:-7979}:7878"
+
+    environment:
+      # Files are written as this user. Run "id" on the host and use the numbers it
+      # prints, otherwise downloads land as root and the host account cannot edit them.
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+
+    volumes:
+      # Database, config.xml and logs. Back this up; everything else is replaceable.
+      - ./config:/config
+
+      # Media and downloads. Mount the download client's completed folder and the
+      # library under a single parent so imports are a move on one filesystem rather
+      # than a full copy across two.
+      - /path/to/media:/media
+
+      # Optional: the per-movie compression worker's socket directory.
+      # See docker/compression/README.md.
+      # - ./compression-shared:/compression
