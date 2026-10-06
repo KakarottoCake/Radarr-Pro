@@ -57,10 +57,10 @@ You need [Docker](https://docs.docker.com/get-docker/).
 ### Quick start
 
 ```bash
-docker run -d --name radarr-pro -p 7979:7878 -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -v radarr-pro-config:/config -v /path/to/media:/media --restart unless-stopped ghcr.io/kakarottocake/radarr-pro:latest
+docker run -d --name radarr-pro -p 6980:7878 -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -v radarr-pro-config:/config -v /path/to/media:/media --restart unless-stopped ghcr.io/kakarottocake/radarr-pro:latest
 ```
 
-Then open **http://localhost:7979**. Upstream Radarr can keep using port 7878.
+Then open **http://localhost:6980**. Upstream Radarr can keep using port 7878.
 
 ### Or with Compose
 

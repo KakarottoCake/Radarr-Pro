@@ -12,7 +12,7 @@ Example worker configuration (keep outside the public repository):
   "socket": "/home/media/radarr-pro/compression-shared/worker.sock",
   "stateDirectory": "/home/media/radarr-pro/compression-state",
   "radarrConfig": "/home/media/radarr-pro/config/config.xml",
-  "radarrUrl": "http://127.0.0.1:7979",
+  "radarrUrl": "http://127.0.0.1:6980",
   "mediaRoots": ["/mnt/media", "/mnt/media2"],
   "scriptIndex": "/home/media/.ghost_index"
 }

@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
 
     ports:
-      - "${RADARR_PRO_PORT:-7979}:7878"
+      - "${RADARR_PRO_PORT:-6980}:7878"
 
     environment:
       # Files are written as this user. Run "id" on the host and use the numbers it
