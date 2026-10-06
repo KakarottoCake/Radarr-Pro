@@ -44,7 +44,7 @@ import DeleteMovieModal from 'Movie/Delete/DeleteMovieModal';
 import EditMovieModal from 'Movie/Edit/EditMovieModal';
 import getMovieStatusDetails from 'Movie/getMovieStatusDetails';
 import MovieHistoryModal from 'Movie/History/MovieHistoryModal';
-import { Image, Statistics } from 'Movie/Movie';
+import Movie, { Image, Statistics } from 'Movie/Movie';
 import MovieCollectionLabel from 'Movie/MovieCollectionLabel';
 import MovieGenres from 'Movie/MovieGenres';
 import MoviePoster from 'Movie/MoviePoster';
@@ -80,6 +80,7 @@ import { fetchImportListSchema } from 'Store/Actions/Settings/importLists';
 import createAllMoviesSelector from 'Store/Selectors/createAllMoviesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createMovieClientSideCollectionItemsSelector from 'Store/Selectors/createMovieClientSideCollectionItemsSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import fonts from 'Styles/Variables/fonts';
 import sortByProp from 'Utilities/Array/sortByProp';
@@ -162,6 +163,9 @@ function MovieDetails({ movieId }: MovieDetailsProps) {
 
   const movie = useMovie(movieId);
   const allMovies = useSelector(createAllMoviesSelector());
+  const { items: movieIndexItems } = useSelector(
+    createMovieClientSideCollectionItemsSelector('movieIndex')
+  ) as { items: { id: number }[] };
 
   const { isMovieFilesFetching, movieFilesError, hasMovieFiles } = useSelector(
     createMovieFilesSelector()
@@ -227,7 +231,19 @@ function MovieDetails({ movieId }: MovieDetailsProps) {
   }, [movieId, commands]);
 
   const { nextMovie, previousMovie } = useMemo(() => {
-    const sortedMovies = [...allMovies].sort(sortByProp('sortTitle'));
+    // Follow the movie index's current filter and sort so next/previous walk the same
+    // list the user came from. Fall back to every movie by title when this movie is
+    // not part of that list.
+    const indexIds = movieIndexItems.map((item) => item.id);
+    const moviesById = new Map(allMovies.map((movie) => [movie.id, movie]));
+    const indexMovies = indexIds.includes(movieId)
+      ? indexIds
+          .map((id) => moviesById.get(id))
+          .filter((movie): movie is Movie => !!movie)
+      : [];
+    const sortedMovies = indexMovies.length
+      ? indexMovies
+      : [...allMovies].sort(sortByProp('sortTitle'));
     const movieIndex = sortedMovies.findIndex((movie) => movie.id === movieId);
 
     if (movieIndex === -1) {
@@ -251,7 +267,7 @@ function MovieDetails({ movieId }: MovieDetailsProps) {
         titleSlug: previousMovie.titleSlug,
       },
     };
-  }, [movieId, allMovies]);
+  }, [movieId, allMovies, movieIndexItems]);
 
   const touchStart = useRef<number | null>(null);
   const [isOrganizeModalOpen, setIsOrganizeModalOpen] = useState(false);
@@ -741,6 +757,8 @@ function MovieDetails({ movieId }: MovieDetailsProps) {
                       anchor={<Icon name={icons.EXTERNAL_LINK} size={20} />}
                       tooltip={
                         <MovieDetailsLinks
+                          title={title}
+                          year={year}
                           tmdbId={tmdbId}
                           imdbId={imdbId}
                           youTubeTrailerId={youTubeTrailerId}
