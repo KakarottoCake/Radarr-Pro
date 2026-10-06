@@ -787,11 +787,13 @@ function MovieDetails({ movieId }: MovieDetailsProps) {
 
               <div>
                 <InfoLabel
-                  className={styles.detailsInfoLabel}
+                  className={styles.pathInfoLabel}
                   name={translate('Path')}
                   size={sizes.LARGE}
                 >
-                  <span className={styles.path}>{path}</span>
+                  <span className={styles.path} title={path}>
+                    {path}
+                  </span>
                 </InfoLabel>
 
                 <InfoLabel

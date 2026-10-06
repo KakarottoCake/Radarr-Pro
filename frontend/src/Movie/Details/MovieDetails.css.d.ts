@@ -24,6 +24,7 @@ interface CssExports {
   'originalLanguage': string;
   'overview': string;
   'path': string;
+  'pathInfoLabel': string;
   'poster': string;
   'qualityProfileName': string;
   'rating': string;
