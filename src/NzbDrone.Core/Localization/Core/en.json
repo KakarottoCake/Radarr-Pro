@@ -623,6 +623,8 @@
   "EnableColorImpairedMode": "Enable Color-Impaired Mode",
   "EnableColorImpairedModeHelpText": "Altered style to allow color-impaired users to better distinguish color coded information",
   "EnableCompletedDownloadHandlingHelpText": "Automatically import completed downloads from download client",
+  "EnableFakeReleaseProtection": "Enable Fake Release Protection",
+  "EnableFakeReleaseProtectionHelpText": "Inspect the contents of a torrent before sending it to the download client and reject releases containing executables, password-protected archives or no usable video",
   "EnableInteractiveSearch": "Enable Interactive Search",
   "EnableInteractiveSearchHelpText": "Will be used when interactive search is used",
   "EnableMetadataHelpText": "Enable metadata file creation for this metadata type",

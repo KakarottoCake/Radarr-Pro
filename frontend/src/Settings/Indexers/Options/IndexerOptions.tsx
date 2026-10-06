@@ -201,6 +201,18 @@ function IndexerOptions({
               {...settings.allowHardcodedSubs}
             />
           </FormGroup>
+
+          <FormGroup>
+            <FormLabel>{translate('EnableFakeReleaseProtection')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="enableFakeReleaseProtection"
+              helpText={translate('EnableFakeReleaseProtectionHelpText')}
+              onChange={handleInputChange}
+              {...settings.enableFakeReleaseProtection}
+            />
+          </FormGroup>
         </Form>
       ) : null}
     </FieldSet>
