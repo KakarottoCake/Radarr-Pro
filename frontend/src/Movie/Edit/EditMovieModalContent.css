@@ -7,3 +7,28 @@
 .labelIcon {
   margin-left: 8px;
 }
+
+.folderControls {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.namingFormat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.namingFormatButton {
+  composes: button from '~Components/Link/Button.css';
+}
+
+.namingFormatExample {
+  overflow-wrap: anywhere;
+  color: var(--helpTextColor);
+  font-size: $smallFontSize;
+}

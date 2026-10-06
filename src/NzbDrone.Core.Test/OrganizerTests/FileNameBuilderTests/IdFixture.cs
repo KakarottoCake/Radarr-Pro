@@ -87,5 +87,21 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             Subject.GetMovieFolder(_movie)
                 .Should().Be($"Movie Title {{{{tmdb-{_movie.TmdbId}}}}}");
         }
+
+        [TestCase(603, "tt0133093", "{tmdb-603}")]
+        [TestCase(0, "tt0133093", "{imdb-tt0133093}")]
+        [TestCase(0, null, "")]
+        [TestCase(0, "invalid", "")]
+        public void plex_id_should_use_a_valid_provider(int tmdbId, string imdbId, string expected)
+        {
+            _movie.Title = "The Matrix";
+            _movie.Year = 1999;
+            _movie.TmdbId = tmdbId;
+            _movie.ImdbId = imdbId;
+            _namingConfig.MovieFolderFormat = "{Movie Title} ({Release Year}) {Plex Id}";
+
+            Subject.GetMovieFolder(_movie)
+                .Should().Be($"The Matrix (1999) {expected}".TrimEnd());
+        }
     }
 }

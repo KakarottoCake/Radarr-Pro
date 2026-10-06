@@ -128,7 +128,15 @@ const movieTokens = [
   { token: '{Release Year}', example: '2009' },
 ];
 
+const folderPresetTokens = [
+  {
+    token: '{Movie Title} ({Release Year}) {Plex Id}',
+    example: "The Movie's Title (2010) {tmdb-123456}",
+  },
+];
+
 const movieIdTokens = [
+  { token: '{Plex Id}', example: '{tmdb-123456}' },
   { token: '{ImdbId}', example: 'tt12345' },
   { token: '{TmdbId}', example: '123456' },
 ];
@@ -288,6 +296,29 @@ function NamingModal(props: NamingModalProps) {
             <FieldSet legend={translate('FileNames')}>
               <div className={styles.groups}>
                 {fileNameTokens.map(({ token, example }) => (
+                  <NamingOption
+                    key={token}
+                    token={token}
+                    example={example}
+                    isFullFilename={true}
+                    tokenSeparator={tokenSeparator}
+                    tokenCase={tokenCase}
+                    size={sizes.LARGE}
+                    onPress={handleOptionPress}
+                  />
+                ))}
+              </div>
+            </FieldSet>
+          ) : null}
+
+          {name === 'movieFolderFormat' ? (
+            <FieldSet legend={translate('Presets')}>
+              <div className={styles.footNote}>
+                <InlineMarkdown data={translate('NamingPresetsHelpText')} />
+              </div>
+
+              <div className={styles.groups}>
+                {folderPresetTokens.map(({ token, example }) => (
                   <NamingOption
                     key={token}
                     token={token}

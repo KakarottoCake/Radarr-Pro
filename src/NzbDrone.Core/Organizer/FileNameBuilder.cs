@@ -332,6 +332,31 @@ namespace NzbDrone.Core.Organizer
         {
             tokenHandlers["{ImdbId}"] = m => movie.MovieMetadata.Value.ImdbId ?? string.Empty;
             tokenHandlers["{TmdbId}"] = m => movie.MovieMetadata.Value.TmdbId.ToString();
+            tokenHandlers["{Plex Id}"] = m => GetPlexId(movie);
+        }
+
+        // Plex matches a movie folder on an embedded {tmdb-123} or {imdb-tt123} hint.
+        // TMDb is Radarr's own source so it is preferred; IMDb is only used when it is well formed.
+        private static string GetPlexId(Movie movie)
+        {
+            var metadata = movie.MovieMetadata?.Value;
+
+            if (metadata == null)
+            {
+                return string.Empty;
+            }
+
+            if (metadata.TmdbId > 0)
+            {
+                return $"{{tmdb-{metadata.TmdbId}}}";
+            }
+
+            if (Regex.IsMatch(metadata.ImdbId ?? string.Empty, @"^tt[0-9]+$"))
+            {
+                return $"{{imdb-{metadata.ImdbId}}}";
+            }
+
+            return string.Empty;
         }
 
         private void AddMovieFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, MovieFile movieFile, bool multipleTokens)

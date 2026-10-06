@@ -2,7 +2,11 @@
 // Please do not change this file!
 interface CssExports {
   'deleteButton': string;
+  'folderControls': string;
   'labelIcon': string;
+  'namingFormat': string;
+  'namingFormatButton': string;
+  'namingFormatExample': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

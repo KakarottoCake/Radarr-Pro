@@ -15,6 +15,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
+import useApiQuery from 'Helpers/Hooks/useApiQuery';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
   icons,
@@ -69,6 +70,10 @@ function EditMovieModalContent({
 
   const [isConfirmMoveModalOpen, setIsConfirmMoveModalOpen] = useState(false);
 
+  const { data: namingFolder, isFetching: isFolderFetching } = useApiQuery<{
+    folder: string;
+  }>({ path: `/movie/${movieId}/folder` });
+
   const { settings, ...otherSettings } = useMemo(() => {
     return selectSettings(
       {
@@ -98,6 +103,35 @@ function EditMovieModalContent({
     },
     [dispatch]
   );
+
+  const currentPath = (settings.path.value as string | undefined) ?? '';
+  const separatorIndex = Math.max(
+    currentPath.lastIndexOf('/'),
+    currentPath.lastIndexOf('\\')
+  );
+  const parentPath = currentPath.slice(0, separatorIndex + 1);
+  const folderName = currentPath.slice(separatorIndex + 1);
+  const isFolderNameInvalid =
+    !folderName.trim() || folderName === '.' || folderName === '..';
+
+  const handleFolderNameChange = useCallback(
+    ({ value }: InputChanged<string>) => {
+      // Only the last segment is editable here, so the parent can't be changed by accident.
+      if (!/[\\/]/.test(value)) {
+        handleInputChange({ name: 'path', value: `${parentPath}${value}` });
+      }
+    },
+    [parentPath, handleInputChange]
+  );
+
+  const handleUseNamingFormat = useCallback(() => {
+    if (namingFolder?.folder && parentPath) {
+      handleInputChange({
+        name: 'path',
+        value: `${parentPath}${namingFolder.folder}`,
+      });
+    }
+  }, [namingFolder, parentPath, handleInputChange]);
 
   const handleRootFolderPress = useCallback(() => {
     setIsRootFolderModalOpen(true);
@@ -205,6 +239,46 @@ function EditMovieModalContent({
           </FormGroup>
 
           <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('MovieFolderName')}</FormLabel>
+
+            <div className={styles.folderControls}>
+              <FormInputGroup
+                type={inputTypes.TEXT}
+                name="folderName"
+                value={folderName}
+                helpText={translate('MovieFolderRenameHelpText')}
+                errors={
+                  isFolderNameInvalid
+                    ? [{ message: translate('MovieFolderNameInvalid') }]
+                    : []
+                }
+                onChange={handleFolderNameChange}
+              />
+
+              <div className={styles.namingFormat}>
+                <Button
+                  className={styles.namingFormatButton}
+                  isDisabled={
+                    isFolderFetching || !namingFolder?.folder || !parentPath
+                  }
+                  onPress={handleUseNamingFormat}
+                >
+                  {translate('UseNamingFormat')}
+                </Button>
+
+                {namingFolder?.folder ? (
+                  <span
+                    className={styles.namingFormatExample}
+                    title={translate('MovieFolderNamingFormatHelpText')}
+                  >
+                    {namingFolder.folder}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
             <FormLabel>{translate('Path')}</FormLabel>
 
             <FormInputGroup
@@ -253,6 +327,7 @@ function EditMovieModalContent({
         <SpinnerErrorButton
           error={saveError}
           isSpinning={isSaving}
+          isDisabled={isFolderNameInvalid}
           onPress={handleSavePress}
         >
           {translate('Save')}
