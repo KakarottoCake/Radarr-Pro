@@ -47,6 +47,7 @@ import MovieIndexFooter from './MovieIndexFooter';
 import MovieIndexRefreshMovieButton from './MovieIndexRefreshMovieButton';
 import MovieIndexSearchButton from './MovieIndexSearchButton';
 import MovieIndexSearchMenuItem from './MovieIndexSearchMenuItem';
+import MoviePathFilter from './MoviePathFilter';
 import MovieIndexOverviews from './Overview/MovieIndexOverviews';
 import MovieIndexOverviewOptionsModal from './Overview/Options/MovieIndexOverviewOptionsModal';
 import MovieIndexPosters from './Posters/MovieIndexPosters';
@@ -92,6 +93,7 @@ const MovieIndex = withScrollPosition((props: MovieIndexProps) => {
     sortKey,
     sortDirection,
     view,
+    pathFilter,
   }: MoviesAppState & MovieIndexAppState & ClientSideCollectionAppState =
     useSelector(createMovieClientSideCollectionItemsSelector('movieIndex'));
 
@@ -243,7 +245,7 @@ const MovieIndex = withScrollPosition((props: MovieIndexProps) => {
           <PageToolbarSection>
             <MovieIndexRefreshMovieButton
               isSelectMode={isSelectMode}
-              selectedFilterKey={selectedFilterKey}
+              selectedFilterKey={pathFilter ? 'path' : selectedFilterKey}
             />
 
             <PageToolbarButton
@@ -338,6 +340,7 @@ const MovieIndex = withScrollPosition((props: MovieIndexProps) => {
             />
           </PageToolbarSection>
         </PageToolbar>
+        <MoviePathFilter count={items.length} total={totalItems} />
         <div className={styles.pageContentBodyWrapper}>
           <PageContentBody
             ref={scrollerRef}

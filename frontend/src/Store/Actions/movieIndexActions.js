@@ -305,6 +305,7 @@ export const defaultState = {
   },
 
   selectedFilterKey: 'all',
+  pathFilter: '',
 
   filters,
   filterPredicates,
@@ -599,6 +600,7 @@ export const persistState = [
   'movieIndex.sortKey',
   'movieIndex.sortDirection',
   'movieIndex.selectedFilterKey',
+  'movieIndex.pathFilter',
   'movieIndex.customFilters',
   'movieIndex.view',
   'movieIndex.columns',
@@ -612,6 +614,7 @@ export const persistState = [
 
 export const SET_MOVIE_SORT = 'movieIndex/setMovieSort';
 export const SET_MOVIE_FILTER = 'movieIndex/setMovieFilter';
+export const SET_MOVIE_PATH_FILTER = 'movieIndex/setMoviePathFilter';
 export const SET_MOVIE_VIEW = 'movieIndex/setMovieView';
 export const SET_MOVIE_TABLE_OPTION = 'movieIndex/setMovieTableOption';
 export const SET_MOVIE_POSTER_OPTION = 'movieIndex/setMoviePosterOption';
@@ -622,6 +625,7 @@ export const SET_MOVIE_OVERVIEW_OPTION = 'movieIndex/setMovieOverviewOption';
 
 export const setMovieSort = createAction(SET_MOVIE_SORT);
 export const setMovieFilter = createAction(SET_MOVIE_FILTER);
+export const setMoviePathFilter = createAction(SET_MOVIE_PATH_FILTER);
 export const setMovieView = createAction(SET_MOVIE_VIEW);
 export const setMovieTableOption = createAction(SET_MOVIE_TABLE_OPTION);
 export const setMoviePosterOption = createAction(SET_MOVIE_POSTER_OPTION);
@@ -634,6 +638,10 @@ export const reducers = createHandleActions({
 
   [SET_MOVIE_SORT]: createSetClientSideCollectionSortReducer(section),
   [SET_MOVIE_FILTER]: createSetClientSideCollectionFilterReducer(section),
+
+  [SET_MOVIE_PATH_FILTER]: function(state, { payload }) {
+    return Object.assign({}, state, { pathFilter: payload.pathFilter });
+  },
 
   [SET_MOVIE_VIEW]: function(state, { payload }) {
     return Object.assign({}, state, { view: payload.view });

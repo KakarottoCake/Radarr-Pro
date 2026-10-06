@@ -8,6 +8,7 @@ import Movie from 'Movie/Movie';
 import { Filter, FilterBuilderProp } from './AppState';
 
 export interface MovieIndexAppState {
+  pathFilter: string;
   sortKey: string;
   sortDirection: SortDirection;
   secondarySortKey: string;

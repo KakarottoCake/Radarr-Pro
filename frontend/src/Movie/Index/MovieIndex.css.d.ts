@@ -5,6 +5,10 @@ interface CssExports {
   'contentBodyContainer': string;
   'errorMessage': string;
   'pageContentBodyWrapper': string;
+  'pathFilter': string;
+  'pathFilterCount': string;
+  'pathFilterLabel': string;
+  'pathFilterPicker': string;
   'postersInnerContentBody': string;
   'tableInnerContentBody': string;
 }
